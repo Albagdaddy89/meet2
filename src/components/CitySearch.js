@@ -1,35 +1,27 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const CitySearch = ({ allLocations, setCurrentCity, setInfoAlert }) => {
+const CitySearch = ({ allLocations, setCurrentCity }) => {
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
   const handleInputChange = (event) => {
     const value = event.target.value;
-    const filteredLocations = allLocations
-      ? allLocations.filter((location) => {
-          return location.toUpperCase().indexOf(value.toUpperCase()) > -1;
-        })
-      : [];
     setQuery(value);
-    setSuggestions(filteredLocations);
-
-    let infoText;
-    if (filteredLocations.length === 0) {
-      infoText =
-        "We can not find the city you are looking for. Please try another city";
-    } else {
-      infoText = "";
-    }
-    setInfoAlert(infoText);
+    setSuggestions(
+      allLocations.filter((location) =>
+        location.toUpperCase().includes(value.toUpperCase())
+      )
+    );
+    setShowSuggestion(true);
   };
 
-  const handleClick = (suggestion) => {
-    setQuery(suggestion);
+  const handleClick = (event) => {
+    const value = event.target.textContent;
+    console.log("Clicked suggestion:", value);
+    setQuery(value);
     setShowSuggestion(false);
-    setCurrentCity(suggestion);
-    setInfoAlert("");
+    setCurrentCity(value);
   };
 
   useEffect(() => {
@@ -44,25 +36,24 @@ const CitySearch = ({ allLocations, setCurrentCity, setInfoAlert }) => {
         placeholder="Search for a city"
         value={query}
         onFocus={() => setShowSuggestion(true)}
+        onBlur={() => setShowSuggestion(false)}
         onChange={handleInputChange}
       />
-      {showSuggestion ? (
+      {showSuggestion && (
         <ul className="suggestion">
-          {suggestions.map((suggestion) => {
-            return (
-              <li onClick={() => handleClick(suggestion)} key={suggestion}>
-                {suggestion}
-              </li>
-            );
-          })}
+          {suggestions.map((suggestion) => (
+            <li key={suggestion} onClick={() => handleClick(suggestion)}>
+              {suggestion}
+            </li>
+          ))}
           <li
-            key="See all the cities"
+            key="See all cities"
             onClick={() => handleClick("See all cities")}
           >
             <b>See all cities</b>
           </li>
         </ul>
-      ) : null}
+      )}
     </div>
   );
 };
